@@ -51,18 +51,16 @@ func producer(jobs chan<- *Job, stopChan chan struct{}, nc *nats.Conn) {
 	}
 }
 
-func writer(results <-chan *Job, done chan<- bool, nc *nats.Conn) {
+func writer(results <-chan *Job, done chan<- bool, nc *nats.Conn, validSub string) {
 	for {
 		j, more := <-results
 		if more {
-			err := nc.Publish("valid", []byte(j.url))
+			err := nc.Publish(validSub, []byte(j.url))
 			if err != nil {
 				log.Println(err)
 			}
-			done <- true
 		} else {
-			done <- true
-			return
+			time.Sleep(time.Minute)
 		}
 	}
 }
@@ -115,12 +113,12 @@ func setupConnOptions(opts []nats.Option) []nats.Option {
 
 
 func main() {
-	workerRoutines := flag.Int("threads", 1000, "")
-	maxJobs := flag.Int("maxjobs", 10000, "")
-	flag.Parse()
-
-	var urls = flag.String("s", nats.DefaultURL, "The nats server URLs (separated by comma)")
-
+	var (
+		workerRoutines = flag.Int("threads", 500, "")
+		maxJobs = flag.Int("maxjobs", 100000, "")
+		urls = flag.String("s", nats.DefaultURL, "The nats server URLs (separated by comma)")
+		validSub = flag.String("validsubj", "valid", "subj to pub valid")
+	)
 	flag.Parse()
 
 	opts := []nats.Option{nats.Name("sub1")}
@@ -149,7 +147,7 @@ func main() {
 	}
 
 	go producer(jobs, stopChan, nc)
-	go writer(results, done, nc)
+	go writer(results, done, nc, *validSub)
 	go signalStop(signalCh, stopChan)
 	go rateDisplay(counter)
 	wg.Wait()
