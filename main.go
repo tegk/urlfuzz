@@ -35,7 +35,6 @@ func LoadUrls(letters string, baseURL string, maxNumbers int, availableLetters s
 		thirdLetter := 'a'
 		for second := 0; second < alphabetLen; second++ {
 			secondLetter = rune(availableLetters[second])
-
 			for third := 0; third < alphabetLen; third++ {
 				thirdLetter = rune(availableLetters[third])
 
