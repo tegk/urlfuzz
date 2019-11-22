@@ -24,30 +24,6 @@ func isLetter(c rune) bool {
 	return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z')
 }
 
-func LoadUrls(letters string, baseURL string, maxNumbers int, availableLetters string) []string {
-	alphabetLen := len(availableLetters)
-	var urls []string
-	for _, firstLetter := range letters {
-		if !isLetter(firstLetter) {
-			log.Fatalf("a number or non alphabetic character was entered in letters flag: %v", firstLetter)
-		}
-		secondLetter := 'a'
-		thirdLetter := 'a'
-		for second := 0; second < alphabetLen; second++ {
-			secondLetter = rune(availableLetters[second])
-			for third := 0; third < alphabetLen; third++ {
-				thirdLetter = rune(availableLetters[third])
-
-				for number := 0; number < maxNumbers; number++ {
-					newUrl := fmt.Sprintf(baseURL, string(firstLetter), string(secondLetter), string(thirdLetter), number)
-					urls = append(urls, newUrl)
-				}
-			}
-		}
-	}
-	return urls
-}
-
 func httpRequest(url string) (bool, error) {
 	var netClient = &http.Client{
 		Timeout: time.Second * 5,
@@ -69,6 +45,7 @@ func httpRequest(url string) (bool, error) {
 
 func producer(jobs chan<- *Job, stopChan chan struct{}, baseURL string, maxNumbers int, availableLetters string) {
 	alphabetLen := len(availableLetters)
+	//var links []string
 	for _, firstLetter := range availableLetters {
 		if !isLetter(firstLetter) {
 			log.Fatalf("a number or non alphabetic character was entered in letters flag: %v", firstLetter)
@@ -80,26 +57,13 @@ func producer(jobs chan<- *Job, stopChan chan struct{}, baseURL string, maxNumbe
 			for third := 0; third < alphabetLen; third++ {
 				thirdLetter = rune(availableLetters[third])
 				for number := 0; number < maxNumbers; number++ {
-					newUrl := fmt.Sprintf(baseURL, string(firstLetter), string(secondLetter), string(thirdLetter), number)
-					jobs <- &Job{url: newUrl}
+					newURL := fmt.Sprintf(baseURL, string(firstLetter), string(secondLetter), string(thirdLetter), number)
+					jobs <- &Job{url: newURL}
 				}
 			}
 		}
 	}
 	close(jobs)
-}
-
-func writer(results <-chan *Job, done chan<- bool) {
-	for {
-		j, more := <-results
-		if more {
-			log.Println("found valid url:", j.url)
-			os.Exit(2)
-		} else {
-			done <- true
-			return
-		}
-	}
 }
 
 func worker(jobs <-chan *Job, results chan<- *Job, counter *ratecounter.RateCounter) {
@@ -110,7 +74,8 @@ func worker(jobs <-chan *Job, results chan<- *Job, counter *ratecounter.RateCoun
 			_, err := httpRequest(j.url)
 			counter.Incr(1)
 			if err == nil {
-				results <- j
+				log.Println("found valid url:", j.url)
+				os.Exit(2)
 			}
 		} else {
 			return
@@ -136,10 +101,10 @@ func main() {
 
 	defaultBaseUrl := "https://pbg-assets.s3.amazonaws.com/editorial/pbo/20190619/20190619-PBO-Update_%s%s%s%03d.png"
 
-	workerRoutines := flag.Int("threads", 1000, "")
+	workerRoutines := flag.Int("threads", 5000, "")
 	maxNumbers := flag.Int("maxNumbers", 1000, "")
 
-	maxJobs := flag.Int("maxjobs", 10000, "")
+	maxJobs := flag.Int("maxjobs", 1000000, "")
 	availableLetters := flag.String("availableLetters", "abcdefghijklmnopqrstuvwxyz", "")
 	baseUrl := flag.String("baseURL", defaultBaseUrl, "")
 	flag.Parse()
@@ -161,7 +126,6 @@ func main() {
 	}
 
 	go producer(jobs, stopChan, *baseUrl, *maxNumbers, *availableLetters)
-	go writer(results, done)
 	go signalStop(signalCh, stopChan)
 	go rateDisplay(counter)
 	wg.Wait()
