@@ -3,11 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/nats-io/nats.go"
 	"log"
 	"os"
 	"os/signal"
 	"sync"
+
+	"github.com/nats-io/nats.go"
 )
 
 var wg sync.WaitGroup
@@ -33,8 +34,8 @@ func producer(jobs chan<- *Job, stopChan chan struct{}, baseURL string, maxNumbe
 			for third := 0; third < alphabetLen; third++ {
 				thirdLetter = rune(availableLetters[third])
 				for number := 0; number < maxNumbers; number++ {
-					newUrl := fmt.Sprintf(baseURL, string(firstLetter), string(secondLetter), string(thirdLetter), number)
-					jobs <- &Job{url: []byte(newUrl)}
+					newURL := fmt.Sprintf(baseURL, string(firstLetter), string(secondLetter), string(thirdLetter), number)
+					jobs <- &Job{url: []byte(newURL)}
 				}
 			}
 		}
@@ -79,14 +80,14 @@ func signalStop(signalCh chan os.Signal, stopChan chan struct{}) {
 
 func main() {
 	//"https://usg-assets.s3.amazonaws.com/assets/upbit-sg/201911/20191121-usg_%s%s%s%03d.png"
-	//defaultBaseUrl := "http://localhost:2027/assets/upbit-sg/201911/20191121-usg_%s%s%s%03d.jpg"
+	//defaultURL := "http://localhost:2027/assets/upbit-sg/201911/20191121-usg_%s%s%s%03d.jpg"
 
 	var (
-		defaultBaseUrl   = "https://pbg-assets.s3.amazonaws.com/editorial/pbo/20190619/20190619-PBO-Update_%s%s%s%03d.png"
+		defaultURL       = "https://pbg-assets.s3.amazonaws.com/editorial/pbo/20190619/20190619-PBO-Update_%s%s%s%03d.png"
 		workerRoutines   = flag.Int("threads", 1, "")
 		maxJobs          = flag.Int("maxjobs", 500000, "")
 		availableLetters = flag.String("availableLetters", "abcdefghijklmnopqrstuvwxyz", "")
-		baseUrl          = flag.String("baseURL", defaultBaseUrl, "")
+		baseURL          = flag.String("baseURL", defaultURL, "")
 		maxNumbers       = flag.Int("maxNumbers", 1000, "")
 		urls             = flag.String("s", nats.DefaultURL, "The nats server URLs (separated by comma)")
 	)
@@ -117,7 +118,7 @@ func main() {
 		go publisher(jobs, results, nc)
 	}
 
-	go producer(jobs, stopChan, *baseUrl, *maxNumbers, *availableLetters)
+	go producer(jobs, stopChan, *baseURL, *maxNumbers, *availableLetters)
 	go resultSubscriber(done, nc)
 	go signalStop(signalCh, stopChan)
 	wg.Wait()

@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/paulbellamy/ratecounter"
 	"io"
 	"io/ioutil"
 	"log"
@@ -12,6 +11,8 @@ import (
 	"os/signal"
 	"sync"
 	"time"
+
+	"github.com/paulbellamy/ratecounter"
 )
 
 var wg sync.WaitGroup
@@ -96,10 +97,7 @@ func rateDisplay(counter *ratecounter.RateCounter) {
 }
 
 func main() {
-	//"https://usg-assets.s3.amazonaws.com/assets/upbit-sg/201911/20191121-usg_%s%s%s%03d.png"
-	//defaultBaseUrl := "http://localhost:2027/assets/upbit-sg/201911/20191121-usg_%s%s%s%03d.jpg"
-
-	defaultBaseUrl := "https://pbg-assets.s3.amazonaws.com/editorial/pbo/20190619/20190619-PBO-Update_%s%s%s%03d.png"
+	defaultBaseUrl := "https://test-assets.s3.amazonaws.com/test/test/20190619/20190619-TEST-test%s%s%s%03d.png"
 
 	workerRoutines := flag.Int("threads", 5000, "")
 	maxNumbers := flag.Int("maxNumbers", 1000, "")

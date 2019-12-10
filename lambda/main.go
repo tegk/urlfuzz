@@ -71,6 +71,7 @@ func producer(jobs chan<- *Job, stopChan chan struct{}, baseURL string, maxNumbe
 	for _, firstLetter := range availableLetters {
 		if !isLetter(firstLetter) {
 			log.Fatalf("a number or non alphabetic character was entered in letters flag: %v", firstLetter)
+			return
 		}
 		secondLetter := 'a'
 		thirdLetter := 'a'
