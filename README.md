@@ -16,15 +16,12 @@ go build
 ## Usage
 
 ```go
-    defaultBaseUrl := "https://test-assets.s3.amazonaws.com/test/test/20190619/20190619-TEST-test%s%s%s%03d.png"
-
+        defaultBaseUrl := "https://test-assets.s3.amazonaws.com/test/test/20190619/20190619-TEST-test%s%s%s%03d.png"
 	workerRoutines := flag.Int("threads", 5000, "")
 	maxNumbers := flag.Int("maxNumbers", 1000, "")
-
 	maxJobs := flag.Int("maxjobs", 1000000, "")
 	availableLetters := flag.String("availableLetters", "abcdefghijklmnopqrstuvwxyz", "")
 	baseUrl := flag.String("baseURL", defaultBaseUrl, "")
-	flag.Parse()
 ```
 
 ## Contributing
