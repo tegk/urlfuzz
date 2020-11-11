@@ -1,8 +1,8 @@
-# urlfuzz - WIP
+# urlfuzz
 
-urlfuzz is a highly concurrent AWS S3 URL fuzzer for time critical use cases. A distributed, clustered version that can can leverage as many as necessary workers nodes with load balancing is included. A AWS lambda version is included as proof of concept.
+urlfuzz is a highly concurrent AWS S3 URL fuzzer for time-critical use cases. A distributed, clustered version, which can use as many worker nodes as necessary with load balancing, is included. An AWS lambda version is included as proof of concept.
 
-Benchmarked with 1.9 million operations per seconds running as cluster with master and worker nodes on 20 Amazon EC2 M6g instances.
+Benchmarking with 1.9 million operations per second running as a cluster with master and worker nodes on 20 Amazon EC2 M6g instances.
 ## Installation
 
 Build it from source:
